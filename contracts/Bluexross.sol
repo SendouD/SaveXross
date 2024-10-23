@@ -7,6 +7,10 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  import "./stakecoin.sol";
 import "./rewardcoin.sol";
 import "hardhat/console.sol";
+
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
 contract Bluexross is Ownable, AccessControl{
     
     constructor() Ownable(msg.sender){
@@ -15,6 +19,11 @@ contract Bluexross is Ownable, AccessControl{
            IssuestoTime["accident"]=3 minutes;
            IssuestoTime["animalabuse"]=4 minutes;         
     }
+    
+
+    address public EPNS_COMM_CONTRACT_ADDRESS;
+    address public CHANNEL_ADDRESS;
+
     
     bytes32 public constant VERIFIER = keccak256("VERIFIER");
 
@@ -98,6 +107,28 @@ contract Bluexross is Ownable, AccessControl{
         AddresstoIds[msg.sender].push(issues.length+1);
 
         issues.push(issue);
+     string memory title = string(abi.encodePacked("Animal Rescue issued at ", addres));
+    string memory body = string(abi.encodePacked("Contact the given number if you are neary and help them phone : ", phoneNo));
+        EPNS_COMM_CONTRACT_ADDRESS = 0x0C34d54a09CFe75BCcd878A469206Ae77E0fe6e7;
+        CHANNEL_ADDRESS=0x487a30c88900098b765d76285c205c7c47582512;
+        address to=0x487a30c88900098b765d76285c205c7c47582512;
+        IPUSHCommInterface(EPNS_COMM_CONTRACT_ADDRESS).sendNotification(
+            CHANNEL_ADDRESS, 
+            to, 
+            bytes(
+                string(
+                    abi.encodePacked(
+                        "0",
+                        "+",
+                        "3",
+                        "+",
+                        title,
+                        "+",
+                        body
+                    )
+                )
+            )
+        );
          
         emit IssueRised(issue,time,"pending");
     }
